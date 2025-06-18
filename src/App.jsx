@@ -1,11 +1,14 @@
-import { useState } from 'react'
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import RecipeList from "./pages/RecipeList";
+import RecipeDetail from "./pages/RecipeDetail";
 
-
-function App() {
-  
+export default function App() {
   return (
-    <p className="text-red-900"> Check test test</p>
-  )
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<RecipeList />} />
+        
+      </Routes>
+    </BrowserRouter>
+  );
 }
-
-export default App 
