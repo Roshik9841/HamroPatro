@@ -1,162 +1,150 @@
-import React from "react";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-export default function AddRecipeForm({ addNewRecipe }) {
-  const [formData, setFormData] = React.useState({
-    strMeal: "",
-    strMealThumb: "",
-    strCategory: "",
-    strArea: "",
-    strInstructions: "",
-    ingredients: Array(20).fill(""),
-    measures: Array(20).fill(""),
-  });
+export default function AddRecipeForm({ onAdd }) {
+  const [name, setName] = useState("");
+  const [image, setImage] = useState("");
+  const [category, setCategory] = useState("");
+  const [area, setArea] = useState("");
+  const [instructions, setInstructions] = useState("");
+  const [source, setSource] = useState("");
+  const [youtube, setYoutube] = useState("");
+  const [ingredients, setIngredients] = useState([{ ingredient: "", measurement: "" }]);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+  const handleIngredientChange = (idx, field, value) => {
+    setIngredients((prev) =>
+      prev.map((item, i) => (i === idx ? { ...item, [field]: value } : item))
+    );
   };
 
-  const handleIngredientChange = (index, value) => {
-    const updatedIngredients = [...formData.ingredients];
-    updatedIngredients[index] = value;
-    setFormData({ ...formData, ingredients: updatedIngredients });
-  };
-
-  const handleMeasureChange = (index, value) => {
-    const updatedMeasures = [...formData.measures];
-    updatedMeasures[index] = value;
-    setFormData({ ...formData, measures: updatedMeasures });
+  const addIngredientField = () => {
+    setIngredients((prev) => [...prev, { ingredient: "", measurement: "" }]);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
+    if (!name.trim() || !image.trim() || !instructions.trim() || ingredients.some(i => !i.ingredient.trim() || !i.measurement.trim())) {
+      setError("Please fill in all required fields.");
+      return;
+    }
+    // Build MealDB-style object
     const newRecipe = {
-      idMeal: Date.now().toString(),
-      strMeal: formData.strMeal,
-      strMealThumb: formData.strMealThumb,
-      strCategory: formData.strCategory,
-      strArea: formData.strArea,
-      strInstructions: formData.strInstructions,
-      strTags: "", // optional tag field
-      strYoutube: "", // optional YouTube field
+      idMeal: `local-${Date.now()}`,
+      strMeal: name,
+      strMealThumb: image,
+      strCategory: category,
+      strArea: area,
+      strInstructions: instructions,
+      strSource: source,
+      strYoutube: youtube,
     };
-
-    // Add strIngredient1 to strIngredient20 and strMeasure1 to strMeasure20
-    for (let i = 0; i < 20; i++) {
-      newRecipe[`strIngredient${i + 1}`] = formData.ingredients[i] || "";
-      newRecipe[`strMeasure${i + 1}`] = formData.measures[i] || "";
+    for (let i = 0; i < ingredients.length; i++) {
+      newRecipe[`strIngredient${i + 1}`] = ingredients[i].ingredient || "";
+      newRecipe[`strMeasure${i + 1}`] = ingredients[i].measurement || "";
     }
-
-    // Convert empty strings to null (to match TheMealDB format)
-    for (let i = 1; i <= 20; i++) {
-      if (newRecipe[`strIngredient${i}`].trim() === "") {
-        newRecipe[`strIngredient${i}`] = null;
-      }
-      if (newRecipe[`strMeasure${i}`].trim() === "") {
-        newRecipe[`strMeasure${i}`] = null;
-      }
-    }
-
-    addNewRecipe(newRecipe);
-
-    // Reset form
-    setFormData({
-      strMeal: "",
-      strMealThumb: "",
-      strCategory: "",
-      strArea: "",
-      strInstructions: "",
-      ingredients: Array(20).fill(""),
-      measures: Array(20).fill(""),
-    });
+    // Save to localStorage
+    const stored = JSON.parse(localStorage.getItem("localRecipes") || "[]");
+    const updated = [newRecipe, ...stored];
+    localStorage.setItem("localRecipes", JSON.stringify(updated));
+    setName("");
+    setImage("");
+    setCategory("");
+    setArea("");
+    setInstructions("");
+    setSource("");
+    setYoutube("");
+    setIngredients([{ ingredient: "", measurement: "" }]);
+    setError("");
+    if (onAdd) onAdd(newRecipe);
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="bg-white p-6 rounded-xl shadow mb-6 space-y-4"
-    >
-      <h2 className="text-2xl font-bold text-orange-600">Add New Recipe</h2>
-
+    <form onSubmit={handleSubmit} className="bg-white p-6 rounded-xl shadow mb-8 flex flex-col gap-4 max-w-xl mx-auto">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-bold text-gray-700">Add New Recipe</h2>
+        <button
+          type="button"
+          className="bg-gray-200 text-gray-800 px-4 py-2 rounded font-semibold hover:bg-gray-300 transition-colors"
+          onClick={() => navigate("/")}
+        >
+          Back to Recipes
+        </button>
+      </div>
       <input
         type="text"
-        name="strMeal"
-        placeholder="Recipe Name"
-        value={formData.strMeal}
-        onChange={handleChange}
-        className="w-full p-2 border rounded"
-        required
+        placeholder="Recipe Name*"
+        value={name}
+        onChange={(e) => setName(e.target.value)}
+        className="border rounded px-3 py-2 focus:outline-none focus:ring w-full"
       />
-
       <input
         type="text"
-        name="strMealThumb"
-        placeholder="Image URL"
-        value={formData.strMealThumb}
-        onChange={handleChange}
-        className="w-full p-2 border rounded"
-        required
+        placeholder="Image URL*"
+        value={image}
+        onChange={(e) => setImage(e.target.value)}
+        className="border rounded px-3 py-2 focus:outline-none focus:ring w-full"
       />
-
       <input
         type="text"
-        name="strCategory"
-        placeholder="Category (e.g. Dessert)"
-        value={formData.strCategory}
-        onChange={handleChange}
-        className="w-full p-2 border rounded"
+        placeholder="Category"
+        value={category}
+        onChange={(e) => setCategory(e.target.value)}
+        className="border rounded px-3 py-2 focus:outline-none focus:ring w-full"
       />
-
       <input
         type="text"
-        name="strArea"
         placeholder="Area (e.g. Italian)"
-        value={formData.strArea}
-        onChange={handleChange}
-        className="w-full p-2 border rounded"
+        value={area}
+        onChange={(e) => setArea(e.target.value)}
+        className="border rounded px-3 py-2 focus:outline-none focus:ring w-full"
       />
-
       <textarea
-        name="strInstructions"
-        placeholder="Instructions"
-        value={formData.strInstructions}
-        onChange={handleChange}
-        rows="4"
-        className="w-full p-2 border rounded"
-        required
+        placeholder="Instructions*"
+        value={instructions}
+        onChange={(e) => setInstructions(e.target.value)}
+        className="border rounded px-3 py-2 focus:outline-none focus:ring w-full"
+        rows={4}
       />
-
-      <h3 className="text-lg font-semibold text-gray-700">
-        Ingredients & Measures
-      </h3>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {formData.ingredients.map((_, index) => (
-          <div key={index} className="flex gap-2">
+      <input
+        type="text"
+        placeholder="Source (URL or description)"
+        value={source}
+        onChange={e => setSource(e.target.value)}
+        className="border rounded px-3 py-2 focus:outline-none focus:ring w-full"
+      />
+      <input
+        type="text"
+        placeholder="YouTube Link"
+        value={youtube}
+        onChange={(e) => setYoutube(e.target.value)}
+        className="border rounded px-3 py-2 focus:outline-none focus:ring w-full"
+      />
+      <div>
+        <label className="font-semibold">Ingredients & Measurements*</label>
+        {ingredients.map((item, idx) => (
+          <div key={idx} className="flex gap-2 mb-2">
             <input
               type="text"
-              placeholder={`Ingredient ${index + 1}`}
-              value={formData.ingredients[index]}
-              onChange={(e) => handleIngredientChange(index, e.target.value)}
-              className="w-1/2 p-2 border rounded"
+              placeholder={`Ingredient ${idx + 1}`}
+              value={item.ingredient}
+              onChange={e => handleIngredientChange(idx, "ingredient", e.target.value)}
+              className="border rounded px-2 py-1 flex-1"
             />
             <input
               type="text"
-              placeholder={`Measure ${index + 1}`}
-              value={formData.measures[index]}
-              onChange={(e) => handleMeasureChange(index, e.target.value)}
-              className="w-1/2 p-2 border rounded"
+              placeholder={`Measurement ${idx + 1}`}
+              value={item.measurement}
+              onChange={e => handleIngredientChange(idx, "measurement", e.target.value)}
+              className="border rounded px-2 py-1 flex-1"
             />
           </div>
         ))}
+        <button type="button" onClick={addIngredientField} className="mt-2 px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 text-sm font-semibold">+ Add Ingredient</button>
       </div>
-
-      <button
-        type="submit"
-        className="bg-orange-500 text-white px-4 py-2 rounded hover:bg-orange-600"
-      >
-        Add Recipe
-      </button>
+      {error && <div className="text-red-500 text-sm">{error}</div>}
+      <button type="submit" className="bg-[#E15A0C] text-white px-4 py-2 rounded font-semibold hover:bg-orange-600 transition-colors">Add Recipe</button>
     </form>
   );
 }

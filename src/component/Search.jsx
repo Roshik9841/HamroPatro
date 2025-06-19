@@ -1,27 +1,27 @@
 import React from "react";
 
 export default function Search({ allMeals, setFilteredMeals }) {
-  const [searchTerm, setSearchTerm] = React.useState("");
+    const [item, setItem] = React.useState("");
 
-  const handleSearch = (e) => {
-    const searchInput = e.target.value;
-    setSearchTerm(searchInput);
-    const filteredMeals = allMeals.filter(meal => meal.strMeal.toLowerCase().includes(searchInput.toLowerCase()))
-    setFilteredMeals(filteredMeals);
-  };
+    React.useEffect(() => {
+        if (!item) {
+            setFilteredMeals(allMeals);
+        } else {
+            const filtered = allMeals.filter(meal =>
+                meal.strMeal.toLowerCase().includes(item.toLowerCase())
+            );
+            setFilteredMeals(filtered);
+        }
+    }, [item, allMeals, setFilteredMeals]);
 
-  return (
-    <div className="mb-6">
-      <div className="relative">
-        <input
-          type="text"
-          placeholder="Search for recipes..."
-          value={searchTerm}
-          onChange={handleSearch}
-          className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none"
+    return (
+        <input type="text"
+        placeholder="Search the food you want"
+        value={item}
+        onChange={(event)=>{
+           setItem(event.target.value);
+        }}
+        className="rounded-xl w-[80%] mx-auto block mb-6 px-4 py-2 border border-gray-300"
         />
-      </div>
-
-    </div>
-  );
+    );
 }
