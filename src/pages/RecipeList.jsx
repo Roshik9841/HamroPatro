@@ -76,9 +76,7 @@ export default function MealList() {
           Add New Recipe
         </Link>
       </div>
-
       <Search allMeals={allCombinedMeals} setFilteredMeals={setFilteredMeals} />
-
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {filteredMeals?.map(meal => (
           <Link to={`/recipe/${meal.idMeal}`} key={meal.idMeal}>
@@ -86,8 +84,7 @@ export default function MealList() {
               <img src={meal.strMealThumb} alt={meal.strMeal} className="w-full h-60 object-cover rounded-3xl mx-auto" />
               <div className="p-4">
                 <h2 className="text-lg font-bold">{meal.strMeal}</h2>
-                <p className="text-sm text-[#E15A0C] font-semibold  mt-1">View Recipe →</p>
-
+                <p className="text-sm text-[#E15A0C] font-semibold">View Recipe →</p>
                 {meal.ingredients && (
                   <ul className="mb-2">
                     {meal.ingredients.map((item, i) => (
@@ -97,7 +94,6 @@ export default function MealList() {
                     ))}
                   </ul>
                 )}
-
                 {meal.idMeal.startsWith("local-") && (
                   <div className="flex gap-2 mt-2 justify-end">
                     <button
