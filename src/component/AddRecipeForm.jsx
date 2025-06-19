@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function AddRecipeForm({ onAdd }) {
   const [name, setName] = useState("");
@@ -23,6 +23,12 @@ export default function AddRecipeForm({ onAdd }) {
     setIngredients((prev) => [...prev, { ingredient: "", measurement: "" }]);
   };
 
+  const deleteIngredientField = (idx) => {
+    setIngredients(prev =>
+      prev.length > 1 ? prev.filter((_, i) => i !== idx) : prev
+    );
+  };
+
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!name.trim() || !image.trim() || !instructions.trim() || ingredients.some(i => !i.ingredient.trim() || !i.measurement.trim())) {
@@ -40,9 +46,10 @@ export default function AddRecipeForm({ onAdd }) {
       strSource: source,
       strYoutube: youtube,
     };
+    // Add as many ingredients and measures as needed
     for (let i = 0; i < ingredients.length; i++) {
-      newRecipe[`strIngredient${i + 1}`] = ingredients[i].ingredient || "";
-      newRecipe[`strMeasure${i + 1}`] = ingredients[i].measurement || "";
+      newRecipe[`strIngredient${i + 1}`] = ingredients[i]?.ingredient || "";
+      newRecipe[`strMeasure${i + 1}`] = ingredients[i]?.measurement || "";
     }
     // Save to localStorage
     const stored = JSON.parse(localStorage.getItem("localRecipes") || "[]");
@@ -58,19 +65,19 @@ export default function AddRecipeForm({ onAdd }) {
     setIngredients([{ ingredient: "", measurement: "" }]);
     setError("");
     if (onAdd) onAdd(newRecipe);
+    navigate("/");
   };
 
   return (
     <form onSubmit={handleSubmit} className="bg-white p-6 rounded-xl shadow mb-8 flex flex-col gap-4 max-w-xl mx-auto">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold text-gray-700">Add New Recipe</h2>
-        <button
-          type="button"
-          className="bg-gray-200 text-gray-800 px-4 py-2 rounded font-semibold hover:bg-gray-300 transition-colors"
-          onClick={() => navigate("/")}
+        <Link
+          to="/"
+          className="bg-gray-200 text-gray-800 px-4 py-2 rounded font-semibold hover:bg-gray-300 "
         >
           Back to Recipes
-        </button>
+        </Link>
       </div>
       <input
         type="text"
@@ -80,7 +87,7 @@ export default function AddRecipeForm({ onAdd }) {
         className="border rounded px-3 py-2 focus:outline-none focus:ring w-full"
       />
       <input
-        type="text"
+        type="url"
         placeholder="Image URL*"
         value={image}
         onChange={(e) => setImage(e.target.value)}
@@ -95,7 +102,7 @@ export default function AddRecipeForm({ onAdd }) {
       />
       <input
         type="text"
-        placeholder="Area (e.g. Italian)"
+        placeholder="Area (e.g. Nepali)"
         value={area}
         onChange={(e) => setArea(e.target.value)}
         className="border rounded px-3 py-2 focus:outline-none focus:ring w-full"
@@ -111,11 +118,11 @@ export default function AddRecipeForm({ onAdd }) {
         type="text"
         placeholder="Source (URL or description)"
         value={source}
-        onChange={e => setSource(e.target.value)}
+        onChange={(e) => setSource(e.target.value)}
         className="border rounded px-3 py-2 focus:outline-none focus:ring w-full"
       />
       <input
-        type="text"
+        type="url"
         placeholder="YouTube Link"
         value={youtube}
         onChange={(e) => setYoutube(e.target.value)}
@@ -139,6 +146,15 @@ export default function AddRecipeForm({ onAdd }) {
               onChange={e => handleIngredientChange(idx, "measurement", e.target.value)}
               className="border rounded px-2 py-1 flex-1"
             />
+            <button
+              type="button"
+              onClick={() => deleteIngredientField(idx)}
+              className="ml-2 px-2 py-1 bg-red-200 text-red-700 rounded hover:bg-red-300 text-xs"
+              disabled={ingredients.length === 1}
+              title="Delete Ingredient"
+            >
+              ✕
+            </button>
           </div>
         ))}
         <button type="button" onClick={addIngredientField} className="mt-2 px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 text-sm font-semibold">+ Add Ingredient</button>

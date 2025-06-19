@@ -8,9 +8,10 @@ export default function App() {
   return (
     <BrowserRouter>
       <Routes>
+        <Route path="/add-recipe" element={<AddRecipeForm />} />
         <Route path="/" element={<RecipeList />} />
         <Route path="/recipe/:id" element={<RecipeDetail />} />
-        <Route path="/add-recipe" element={<AddRecipeForm />} />
+
         <Route path="/edit-recipe/:id" element={<EditRecipeForm />} />
       </Routes>
     </BrowserRouter>

@@ -12,7 +12,7 @@ export default function Search({ allMeals, setFilteredMeals }) {
             );
             setFilteredMeals(filtered);
         }
-    }, [item, allMeals, setFilteredMeals]);
+    }, [item, allMeals]);
 
     return (
         <input type="text"
