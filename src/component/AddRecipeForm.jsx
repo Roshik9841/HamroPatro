@@ -1,7 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
-
-const MAX_INGREDIENTS = 20;
+import { Link } from "react-router-dom";
 
 export default function AddRecipeForm({ onAdd }) {
   const [name, setName] = useState("");
@@ -9,11 +7,10 @@ export default function AddRecipeForm({ onAdd }) {
   const [category, setCategory] = useState("");
   const [area, setArea] = useState("");
   const [instructions, setInstructions] = useState("");
-  const [tags, setTags] = useState("");
+  const [source, setSource] = useState("");
   const [youtube, setYoutube] = useState("");
   const [ingredients, setIngredients] = useState([{ ingredient: "", measurement: "" }]);
   const [error, setError] = useState("");
-  const navigate = useNavigate();
 
   const handleIngredientChange = (idx, field, value) => {
     setIngredients((prev) =>
@@ -22,9 +19,7 @@ export default function AddRecipeForm({ onAdd }) {
   };
 
   const addIngredientField = () => {
-    if (ingredients.length < MAX_INGREDIENTS) {
-      setIngredients((prev) => [...prev, { ingredient: "", measurement: "" }]);
-    }
+    setIngredients((prev) => [...prev, { ingredient: "", measurement: "" }]);
   };
 
   const handleSubmit = (e) => {
@@ -41,11 +36,11 @@ export default function AddRecipeForm({ onAdd }) {
       strCategory: category,
       strArea: area,
       strInstructions: instructions,
-      strTags: tags,
+      strSource: source,
       strYoutube: youtube,
     };
-    // Add up to 20 ingredients and measures
-    for (let i = 0; i < MAX_INGREDIENTS; i++) {
+    // Add as many ingredients and measures as needed
+    for (let i = 0; i < ingredients.length; i++) {
       newRecipe[`strIngredient${i + 1}`] = ingredients[i]?.ingredient || "";
       newRecipe[`strMeasure${i + 1}`] = ingredients[i]?.measurement || "";
     }
@@ -58,7 +53,7 @@ export default function AddRecipeForm({ onAdd }) {
     setCategory("");
     setArea("");
     setInstructions("");
-    setTags("");
+    setSource("");
     setYoutube("");
     setIngredients([{ ingredient: "", measurement: "" }]);
     setError("");
@@ -69,13 +64,12 @@ export default function AddRecipeForm({ onAdd }) {
     <form onSubmit={handleSubmit} className="bg-white p-6 rounded-xl shadow mb-8 flex flex-col gap-4 max-w-xl mx-auto">
       <div className="flex justify-between items-center mb-4">
         <h2 className="text-xl font-bold text-gray-700">Add New Recipe</h2>
-        <button
-          type="button"
-          className="bg-gray-200 text-gray-800 px-4 py-2 rounded font-semibold hover:bg-gray-300 transition-colors"
-          onClick={() => navigate("/")}
+        <Link
+          to="/"
+          className="bg-gray-200 text-gray-800 px-4 py-2 rounded font-semibold hover:bg-gray-300 "
         >
           Back to Recipes
-        </button>
+        </Link>
       </div>
       <input
         type="text"
@@ -100,7 +94,7 @@ export default function AddRecipeForm({ onAdd }) {
       />
       <input
         type="text"
-        placeholder="Area (e.g. Italian)"
+        placeholder="Area (e.g. Nepali)"
         value={area}
         onChange={(e) => setArea(e.target.value)}
         className="border rounded px-3 py-2 focus:outline-none focus:ring w-full"
@@ -114,9 +108,9 @@ export default function AddRecipeForm({ onAdd }) {
       />
       <input
         type="text"
-        placeholder="Tags (comma separated)"
-        value={tags}
-        onChange={(e) => setTags(e.target.value)}
+        placeholder="Source (URL or description)"
+        value={source}
+        onChange={(e) => setSource(e.target.value)}
         className="border rounded px-3 py-2 focus:outline-none focus:ring w-full"
       />
       <input
@@ -146,9 +140,7 @@ export default function AddRecipeForm({ onAdd }) {
             />
           </div>
         ))}
-        {ingredients.length < MAX_INGREDIENTS && (
-          <button type="button" onClick={addIngredientField} className="mt-2 px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 text-sm font-semibold">+ Add Ingredient</button>
-        )}
+        <button type="button" onClick={addIngredientField} className="mt-2 px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 text-sm font-semibold">+ Add Ingredient</button>
       </div>
       {error && <div className="text-red-500 text-sm">{error}</div>}
       <button type="submit" className="bg-[#E15A0C] text-white px-4 py-2 rounded font-semibold hover:bg-orange-600 transition-colors">Add Recipe</button>
