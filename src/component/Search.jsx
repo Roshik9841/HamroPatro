@@ -1,26 +1,13 @@
 import React from "react";
-import useSWR from "swr";
 
-const fetcher = (url) => fetch(url).then((res) => res.json());
-
-export default function Search({ updateRecipeList }) {
+export default function Search({ allMeals, setFilteredMeals }) {
   const [searchTerm, setSearchTerm] = React.useState("");
 
-  const { data, error } = useSWR(
-    `https://www.themealdb.com/api/json/v1/1/search.php?s=${searchTerm}`,
-    fetcher
-  );
-
-  React.useEffect(() => {
-    if (data && data.meals) {
-      updateRecipeList(data.meals);
-    } else if (searchTerm && data && !data.meals) {
-      updateRecipeList([]);
-    }
-  }, [data]);
-
   const handleSearch = (e) => {
-    setSearchTerm(e.target.value);
+    const searchInput = e.target.value;
+    setSearchTerm(searchInput);
+    const filteredMeals = allMeals.filter(meal => meal.strMeal.toLowerCase().includes(searchInput.toLowerCase()))
+    setFilteredMeals(filteredMeals);
   };
 
   return (
@@ -35,11 +22,6 @@ export default function Search({ updateRecipeList }) {
         />
       </div>
 
-      {error && (
-        <div className="mt-4 text-center text-red-500">
-          Error searching recipes: {error.message}
-        </div>
-      )}
     </div>
   );
 }
