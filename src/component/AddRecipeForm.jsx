@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 export default function AddRecipeForm({ onAdd }) {
   const [name, setName] = useState("");
@@ -11,6 +11,7 @@ export default function AddRecipeForm({ onAdd }) {
   const [youtube, setYoutube] = useState("");
   const [ingredients, setIngredients] = useState([{ ingredient: "", measurement: "" }]);
   const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   const handleIngredientChange = (idx, field, value) => {
     setIngredients((prev) =>
@@ -20,6 +21,12 @@ export default function AddRecipeForm({ onAdd }) {
 
   const addIngredientField = () => {
     setIngredients((prev) => [...prev, { ingredient: "", measurement: "" }]);
+  };
+
+  const deleteIngredientField = (idx) => {
+    setIngredients(prev =>
+      prev.length > 1 ? prev.filter((_, i) => i !== idx) : prev
+    );
   };
 
   const handleSubmit = (e) => {
@@ -58,6 +65,7 @@ export default function AddRecipeForm({ onAdd }) {
     setIngredients([{ ingredient: "", measurement: "" }]);
     setError("");
     if (onAdd) onAdd(newRecipe);
+    navigate("/");
   };
 
   return (
@@ -79,7 +87,7 @@ export default function AddRecipeForm({ onAdd }) {
         className="border rounded px-3 py-2 focus:outline-none focus:ring w-full"
       />
       <input
-        type="text"
+        type="url"
         placeholder="Image URL*"
         value={image}
         onChange={(e) => setImage(e.target.value)}
@@ -114,7 +122,7 @@ export default function AddRecipeForm({ onAdd }) {
         className="border rounded px-3 py-2 focus:outline-none focus:ring w-full"
       />
       <input
-        type="text"
+        type="url"
         placeholder="YouTube Link"
         value={youtube}
         onChange={(e) => setYoutube(e.target.value)}
@@ -138,6 +146,15 @@ export default function AddRecipeForm({ onAdd }) {
               onChange={e => handleIngredientChange(idx, "measurement", e.target.value)}
               className="border rounded px-2 py-1 flex-1"
             />
+            <button
+              type="button"
+              onClick={() => deleteIngredientField(idx)}
+              className="ml-2 px-2 py-1 bg-red-200 text-red-700 rounded hover:bg-red-300 text-xs"
+              disabled={ingredients.length === 1}
+              title="Delete Ingredient"
+            >
+              ✕
+            </button>
           </div>
         ))}
         <button type="button" onClick={addIngredientField} className="mt-2 px-3 py-1 bg-gray-200 rounded hover:bg-gray-300 text-sm font-semibold">+ Add Ingredient</button>

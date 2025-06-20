@@ -3,37 +3,51 @@ import useSWR from "swr";
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
-export default function Search({ updateRecipeList, localRecipes }) {
+export default function Search({ updateRecipeList }) {
   const [searchTerm, setSearchTerm] = React.useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = React.useState(searchTerm);
+  const [localRecipes, setLocalRecipes] = React.useState([]);
 
+  // Load local recipes from localStorage
+  React.useEffect(() => {
+    const stored = JSON.parse(localStorage.getItem("localRecipes") || "[]");
+    setLocalRecipes(stored);
+  }, []);
+
+  // Debounce effect: wait 500ms after typing stops
+  React.useEffect(() => {
+    const handler = setTimeout(() => {
+      setDebouncedSearchTerm(searchTerm);
+    }, 500);
+
+    return () => clearTimeout(handler); // Cleanup on new keystroke
+  }, [searchTerm]);
+
+  // Fetch from API using debounced value
   const { data, error } = useSWR(
-    `https://www.themealdb.com/api/json/v1/1/search.php?s=${searchTerm}`,
+    `https://www.themealdb.com/api/json/v1/1/search.php?s=${debouncedSearchTerm}`,
     fetcher
   );
 
+  // Update recipe list when debounced value or data changes
   React.useEffect(() => {
-    if (searchTerm === "") {
-      // When blank, show both local and API recipes (no duplicates)
+    if (debouncedSearchTerm === "") {
       fetch("https://www.themealdb.com/api/json/v1/1/search.php?s=")
-        .then(res => res.json())
-        .then(apiData => {
+        .then((res) => res.json())
+        .then((apiData) => {
           const apiMeals = apiData.meals || [];
-          const all = [...localRecipes, ...apiMeals.filter(api => !localRecipes.some(l => l.idMeal === api.idMeal))];
-          updateRecipeList(all);
+          updateRecipeList(apiMeals, localRecipes);
         });
     } else {
-      // Filter local recipes by search term
       const filteredLocal = localRecipes.filter(r =>
-        r.strMeal && r.strMeal.toLowerCase().includes(searchTerm.toLowerCase())
+        r.strMeal && r.strMeal.toLowerCase().includes(debouncedSearchTerm.toLowerCase())
       );
-      // API search results
       const apiMeals = data && data.meals ? data.meals : [];
-      // Remove duplicates by idMeal
-      const all = [...filteredLocal, ...apiMeals.filter(api => !filteredLocal.some(l => l.idMeal === api.idMeal))];
-      updateRecipeList(all);
+      updateRecipeList(apiMeals, filteredLocal);
     }
-  }, [data, searchTerm, updateRecipeList, localRecipes]);
+  }, [data, debouncedSearchTerm, updateRecipeList, localRecipes]);
 
+  // Input change handler
   const handleSearch = (e) => {
     setSearchTerm(e.target.value);
   };
@@ -50,9 +64,13 @@ export default function Search({ updateRecipeList, localRecipes }) {
         />
       </div>
 
-      {searchTerm && data && !data.meals && localRecipes.filter(r => r.strMeal && r.strMeal.toLowerCase().includes(searchTerm.toLowerCase())).length === 0 && (
-        <div className="mt-4 text-center text-red-600">Item not found</div>
+      {debouncedSearchTerm &&
+        data &&
+        !data.meals &&
+        localRecipes.filter(r => r.strMeal && r.strMeal.toLowerCase().includes(debouncedSearchTerm.toLowerCase())).length === 0 && (
+          <div className="mt-4 text-center text-red-600">Item not found</div>
       )}
+
       {error && (
         <div className="mt-4 text-center text-red-500">
           Error searching recipes: {error.message}
