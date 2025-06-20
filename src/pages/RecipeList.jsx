@@ -1,15 +1,17 @@
-import React, { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import Search from "../component/Search";
+import Recipe from "../component/Recipe";
 
-export default function MealList() {
-  const [allMeals, setAllMeals] = useState([]);
-  const [filteredMeals, setFilteredMeals] = useState([]);
-  const [localRecipes, setLocalRecipes] = useState([]);
-  const [errors, setErrors] = useState({ category: null, meal: null });
+export default function RecipeList() {
+  const [recipesFromApi, setRecipesFromApi] = useState([]);
+  const [recipesFromLocalStorage, setRecipesFromLocalStorage] = useState([]);
+  const [filteredRecipesFromApi, setFilteredRecipesFromApi] = useState([]);
+  const [filteredRecipesFromLocalStorage, setFilteredRecipesFromLocalStorage] = useState([]);
+  const [errors, setErrors] = useState({ category: null, recipe: null });
   const [categories, setCategories] = useState([]);
 
-  // Fetch categories and local recipes on mount
+  // Fetch categories on mount
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -22,51 +24,50 @@ export default function MealList() {
     };
 
     fetchCategories();
-    const stored = JSON.parse(localStorage.getItem("localRecipes") || "[]");
-    setLocalRecipes(stored);
-  }, []);
+    
+    const localStorageRecipes = JSON.parse(localStorage.getItem("localRecipes") || "[]");
+    setRecipesFromLocalStorage(localStorageRecipes);
+  }, []); 
 
   // Fetch meals by category
   useEffect(() => {
     if (!categories.length) return;
 
-    const fetchMeals = async () => {
+    const fetchRecipes = async () => {
       try {
         const results = await Promise.all(
-          categories.map(async ({ strCategory }) => {
-            const res = await fetch(`https://www.themealdb.com/api/json/v1/1/filter.php?c=${strCategory}`);
-            const data = await res.json();
-            return data.meals || [];
-          })
-        );
-        const flatMeals = results.flat();
-        setAllMeals(flatMeals);
-        setFilteredMeals([...localRecipes, ...flatMeals]);
+        categories.map(async (category) => {
+          const categoryName = category.strCategory;
+          const res = await fetch(`https://www.themealdb.com/api/json/v1/1/filter.php?c=${categoryName}`);
+          const data = await res.json();
+          return data.meals || [];
+        })
+      );
+        const flatRecipes = results.flat();
+        setRecipesFromApi(flatRecipes);
       } catch (err) {
-        setErrors(e => ({ ...e, meal: err }));
+        setErrors(e => ({ ...e, recipe: err }));
       }
     };
 
-    fetchMeals();
+    fetchRecipes();
   }, [categories]);
 
-  // Sync filteredMeals when localRecipes or allMeals change
   useEffect(() => {
-    setFilteredMeals([...localRecipes, ...allMeals]);
-  }, [localRecipes, allMeals]);
+    setFilteredRecipesFromApi(recipesFromApi);
+    setFilteredRecipesFromLocalStorage(recipesFromLocalStorage)
+  }, [recipesFromApi, recipesFromLocalStorage]);
 
-  const allCombinedMeals = useMemo(() => [...localRecipes, ...allMeals], [localRecipes, allMeals]);
-
-  const handleDelete = (id, e) => {
+  const handleLocalRecipeDelete = (id, e) => {
     e.stopPropagation();
     e.preventDefault();
-    const updated = localRecipes.filter(m => m.idMeal !== id);
-    setLocalRecipes(updated);
-    localStorage.setItem("localRecipes", JSON.stringify(updated));
+    const updatedLocalRecipes = recipesFromLocalStorage.filter(recipe => recipe.idMeal !== id);
+    setRecipesFromLocalStorage(updatedLocalRecipes);
+    localStorage.setItem("localRecipes", JSON.stringify(updatedLocalRecipes));
   };
 
   if (errors.category) return <div>Error loading categories</div>;
-  if (errors.meal) return <div>Error loading meals</div>;
+  if (errors.recipe) return <div>Error loading meals</div>;
 
   return (
     <div className="w-[80%] mx-auto p-6">
@@ -76,45 +77,49 @@ export default function MealList() {
           Add New Recipe
         </Link>
       </div>
-      <Search allMeals={allCombinedMeals} setFilteredMeals={setFilteredMeals} />
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-        {filteredMeals?.map(meal => (
-          <Link to={`/recipe/${meal.idMeal}`} key={meal.idMeal}>
-            <div className="bg-white shadow-md rounded-md hover:shadow-xl cursor-pointer">
-              <img src={meal.strMealThumb} alt={meal.strMeal} className="w-full h-60 object-cover rounded-3xl mx-auto" />
-              <div className="p-4">
-                <h2 className="text-lg font-bold">{meal.strMeal}</h2>
-                <p className="text-sm text-[#E15A0C] font-semibold">View Recipe →</p>
-                {meal.ingredients && (
-                  <ul className="mb-2">
-                    {meal.ingredients.map((item, i) => (
-                      <li key={i} className="text-sm text-gray-700">
-                        {item.ingredient} - {item.measurement}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-                {meal.idMeal.startsWith("local-") && (
-                  <div className="flex gap-2 mt-2 justify-end">
-                    <button
-                      className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-xs"
-                      onClick={e => handleDelete(meal.idMeal, e)}
-                    >
-                      Delete
-                    </button>
-                    <Link
-                      to={`/edit-recipe/${meal.idMeal}`}
-                      className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-xs"
-                      onClick={e => e.stopPropagation()}
-                    >
-                      Edit
-                    </Link>
-                  </div>
-                )}
+      <Search 
+        recipesFromApi = {recipesFromApi}
+        recipesFromLocalStorage = {recipesFromLocalStorage}
+        setFilteredRecipesFromApi = {setFilteredRecipesFromApi} 
+        setFilteredRecipesFromLocalStorage = {setFilteredRecipesFromLocalStorage}
+      />
+
+      {filteredRecipesFromLocalStorage.length > 0 && (
+        <>
+          <h2 className="text-3xl font-bold text-center">New & Exciting</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+            {filteredRecipesFromLocalStorage.map(recipe => (
+              <div key = {recipe.idMeal}>
+                <Recipe recipe={recipe} />
+                <div className="flex gap-2 mt-2 justify-end">
+                  <button
+                    className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-xs"
+                    onClick={(e) => handleLocalRecipeDelete(recipe.idMeal, e)}
+                  >
+                    Delete
+                  </button>
+                  <Link
+                    to={`/edit-recipe/${recipe.idMeal}`}
+                    className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600 text-xs"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    Edit
+                  </Link>
+                </div>
               </div>
-            </div>
-          </Link>
-        ))}
+            ))}
+          </div>
+        </>
+      )}
+      
+      <h2 className="text-3xl font-bold text-center">Our Favorites</h2>
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+      {filteredRecipesFromApi?.map(recipe => (
+        <Recipe 
+          key = {recipe.idMeal}
+          recipe={recipe}
+        />
+      ))}
       </div>
     </div>
   );
