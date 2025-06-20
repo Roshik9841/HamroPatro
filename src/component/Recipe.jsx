@@ -3,6 +3,9 @@ import { Link } from "react-router-dom";
 export default function Recipe({recipe}) {
   return (
     <>
+
+    {/* api ra localhost dubai ko value recipe bata pass garyo ani yeta bata display 
+    garyo dherai boilerplate hudaina yesari */}
       <Link to={`/recipe/${recipe.idMeal}`} key={recipe.idMeal}>
         <div className="bg-white shadow-md rounded-md hover:shadow-xl cursor-pointer">
           <img

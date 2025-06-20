@@ -3,13 +3,16 @@ import { useState, useEffect } from "react";
 export default function Search({ recipesFromApi, recipesFromLocalStorage, setFilteredRecipesFromApi, setFilteredRecipesFromLocalStorage }) {
     const [inputText, setInputText] = useState("");
 
+  
     const handleInputChange = (event) => {
       const text = event.target.value;
       setInputText(text);
-
+  //api bata aako value haru filter garni
       const filteredApiRecipes = recipesFromApi.filter(recipe =>
           recipe.strMeal.toLowerCase().includes(text.toLowerCase())
       );
+
+        //localStorage bata aako value haru filter garni
       const filteredLocalRecipes = recipesFromLocalStorage.filter(recipe => 
         recipe.strMeal.toLowerCase().includes(text.toLowerCase())
       );

@@ -14,10 +14,11 @@ export default function RecipeDetail() {
       const fetchRecipeDetails = async () => {
         setIsLoading(true);
         try {
+          //id bata detail fetch garyo
           const res = await fetch(`https://www.themealdb.com/api/json/v1/1/lookup.php?i=${id}`);
           const data = await res.json();
           setIsLoading(false);
-          setRecipeFromApi(data.meals?.[0] || []);
+          setRecipeFromApi(data.meals?.[0] || []);  //data bata aako first recipe yeta rakhxa
         } catch (err) {
           setIsLoading(false);
           setError(err);
@@ -26,7 +27,7 @@ export default function RecipeDetail() {
       
       if(id.startsWith('local-')){
         const stored = JSON.parse(localStorage.getItem("localRecipes") || "[]");
-        const found = stored.find((r) => r.idMeal === id);
+        const found = stored.find((r) => r.idMeal === id); //checking the id localStorage bata ra param ko bata
         if (found){
           setRecipe(found);
         }

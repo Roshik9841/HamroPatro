@@ -23,14 +23,16 @@ export default function RecipeForm({
   const [error, setError] = useState("");
 
   useEffect(() => {
-    if (initialData) setForm(initialData);
+    if (initialData) setForm(initialData); //edit ko lagi sabaii form fill garna
   }, [initialData]);
 
-  const handleChange = (field, value) => {
+  const handleChange = (field, value) => { //field bhaneko "name" haru ani value chahi "event .target.value"
     setForm((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleIngredientChange = (idx, field, value) => {
+    // yesma field ki ta ingredient hunxa ki ta measurement
+    // prev ma sabai ingredient rakhyo ani teslai map garyo
     setForm((prev) => ({
       ...prev,
       ingredients: prev.ingredients.map((item, i) =>

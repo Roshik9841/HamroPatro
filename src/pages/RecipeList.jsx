@@ -11,7 +11,7 @@ export default function RecipeList() {
   const [errors, setErrors] = useState({ category: null, recipe: null });
   const [categories, setCategories] = useState([]);
 
-  // Fetch categories on mount
+  // sabai categories haru fetch garni
   useEffect(() => {
     const fetchCategories = async () => {
       try {
@@ -29,7 +29,7 @@ export default function RecipeList() {
     setRecipesFromLocalStorage(localStorageRecipes);
   }, []); 
 
-  // Fetch meals by category
+  // sabai recipe fetch garni categories anusar
   useEffect(() => {
     if (!categories.length) return;
 
@@ -43,7 +43,7 @@ export default function RecipeList() {
           return data.meals || [];
         })
       );
-        const flatRecipes = results.flat();
+        const flatRecipes = results.flat(); //flat le sabai lai eutai array ma rakhxa
         setRecipesFromApi(flatRecipes);
       } catch (err) {
         setErrors(e => ({ ...e, recipe: err }));
@@ -59,7 +59,7 @@ export default function RecipeList() {
   }, [recipesFromApi, recipesFromLocalStorage]);
 
   const handleLocalRecipeDelete = (id, e) => {
-    e.stopPropagation();
+    e.stopPropagation(); //stopPropagation le bahira ko onclick lai hataidinxa
     e.preventDefault();
     const updatedLocalRecipes = recipesFromLocalStorage.filter(recipe => recipe.idMeal !== id);
     setRecipesFromLocalStorage(updatedLocalRecipes);
@@ -86,12 +86,12 @@ export default function RecipeList() {
 
       {filteredRecipesFromLocalStorage.length > 0 && (
         <>
-          <h2 className="text-3xl font-bold text-center">New & Exciting</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+          <h2 className="text-3xl font-bold text-center mb-10">New & Exciting</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 ">
             {filteredRecipesFromLocalStorage.map(recipe => (
-              <div key = {recipe.idMeal}>
+              <div key = {recipe.idMeal} className="relative">
                 <Recipe recipe={recipe} />
-                <div className="flex gap-2 mt-2 justify-end">
+                <div className="flex gap-2  absolute bottom-[5%] right-[5%]">
                   <button
                     className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-xs"
                     onClick={(e) => handleLocalRecipeDelete(recipe.idMeal, e)}
@@ -112,7 +112,7 @@ export default function RecipeList() {
         </>
       )}
       
-      <h2 className="text-3xl font-bold text-center">Our Favorites</h2>
+      <h2 className="text-3xl font-bold text-center mb-5 mt-10">Our Favorites</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
       {filteredRecipesFromApi?.map(recipe => (
         <Recipe 
