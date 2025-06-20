@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 
 export default function RecipeLayout({ recipe }) {
   const ingredients = [];
+  //harek ingredient ma for loop garxa ani sabai ing ra qty ma rakhxa 
   for (let i = 1; i <= 30; i++) {
     const ing = recipe[`strIngredient${i}`];
     const qty = recipe[`strMeasure${i}`];
@@ -33,6 +34,7 @@ export default function RecipeLayout({ recipe }) {
             <h2 className="text-xl font-semibold text-orange-600 mb-2">🧂 Ingredients</h2>
             <ul className="list-disc list-inside space-y-1 text-gray-700">
               {ingredients.map((item, index) => (
+                //for loop ma rakheko haru paxi yeta map garera dekhauni
                 <li key={index}>{item}</li>
               ))}
             </ul>

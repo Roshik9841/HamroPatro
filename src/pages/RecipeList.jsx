@@ -116,6 +116,7 @@ export default function RecipeList() {
       <h2 className="text-3xl font-bold text-center mb-5 mt-10">Our Favorites</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
       {filteredRecipesFromApi?.map(recipe => (
+        // api wala map gareko
         <Recipe 
           key = {recipe.idMeal}
           recipe={recipe}
