@@ -1,10 +1,10 @@
-import React from "react";
+import React,{useState} from "react";
 import Search from "../component/Search";
 import { Link } from "react-router-dom";
 
-export default function RecipeList() {
-  const [localRecipes, setLocalRecipes] = React.useState([]);
-  const [apiRecipes, setApiRecipes] = React.useState([]);
+export default function RecipeList () {
+  const [localRecipes, setLocalRecipes] = useState([]);
+  const [apiRecipes, setApiRecipes] = useState([]);
 
   const updateRecipeList = (apiItems, localItems) => {
     setApiRecipes(apiItems || []);
@@ -33,6 +33,8 @@ export default function RecipeList() {
       <h2 className="text-2xl font-bold mb-4 text-center">New & Exciting</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 mb-8">
         {localRecipes.length === 0 && <p className="text-gray-500">No local recipes found.</p>}
+
+        {/* localRecipe ko map gareko */}
         {localRecipes.map((meal) => (
           <div key={meal.idMeal} className="relative">
             <Link to={`/recipe/${meal.idMeal}`} style={{ cursor: 'pointer', display: 'block' }}>
@@ -55,6 +57,7 @@ export default function RecipeList() {
       <h2 className="text-2xl font-bold mb-4 text-center">Our Favourites</h2>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
         {apiRecipes.length === 0 && <p className="text-gray-500">No API recipes found.</p>}
+        {/* Api ko data bata map gareko */}
         {apiRecipes.map((meal) => (
           <div key={meal.idMeal} className="relative">
             <Link to={`/recipe/${meal.idMeal}`} style={{ cursor: 'pointer', display: 'block' }}>

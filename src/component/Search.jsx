@@ -1,26 +1,28 @@
-import React from "react";
+import React,{useState,useEffect} from "react";
 import useSWR from "swr";
 
 const fetcher = (url) => fetch(url).then((res) => res.json());
 
 export default function Search({ updateRecipeList }) {
-  const [searchTerm, setSearchTerm] = React.useState("");
-  const [debouncedSearchTerm, setDebouncedSearchTerm] = React.useState(searchTerm);
-  const [localRecipes, setLocalRecipes] = React.useState([]);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchTerm);
+  const [localRecipes, setLocalRecipes] = useState([]);
 
-  // Load local recipes from localStorage
-  React.useEffect(() => {
+  //localStorage ko data load gareko
+  useEffect(() => {
     const stored = JSON.parse(localStorage.getItem("localRecipes") || "[]");
     setLocalRecipes(stored);
   }, []);
 
   // Debounce effect: wait 500ms after typing stops
-  React.useEffect(() => {
+  useEffect(() => {
     const handler = setTimeout(() => {
       setDebouncedSearchTerm(searchTerm);
     }, 500);
 
-    return () => clearTimeout(handler); // Cleanup on new keystroke
+    return () => {
+      clearTimeout(handler); 
+    }// Cleanup 
   }, [searchTerm]);
 
   // Fetch from API using debounced value
@@ -30,13 +32,13 @@ export default function Search({ updateRecipeList }) {
   );
 
   // Update recipe list when debounced value or data changes
-  React.useEffect(() => {
+  useEffect(() => {
     if (debouncedSearchTerm === "") {
       fetch("https://www.themealdb.com/api/json/v1/1/search.php?s=")
         .then((res) => res.json())
         .then((apiData) => {
           const apiMeals = apiData.meals || [];
-          updateRecipeList(apiMeals, localRecipes);
+          updateRecipeList(apiMeals, localRecipes);  //RecipeList ma api data ra localdata pathako
         });
     } else {
       const filteredLocal = localRecipes.filter(r =>
