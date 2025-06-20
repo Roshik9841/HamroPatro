@@ -88,6 +88,7 @@ export default function RecipeList() {
         <>
           <h2 className="text-3xl font-bold text-center mb-10">New & Exciting</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 ">
+            {/* localStorage wala map garda mtra edit ra delete rakheko */}
             {filteredRecipesFromLocalStorage.map(recipe => (
               <div key = {recipe.idMeal} className="relative">
                 <Recipe recipe={recipe} />
