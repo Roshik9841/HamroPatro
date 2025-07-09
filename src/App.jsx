@@ -6,7 +6,7 @@ import EditRecipeForm from "./component/EditRecipeForm";
 
 export default function App() {
   return (
-    <BrowserRouter basename="/HamroPatro/">
+    <BrowserRouter basename="/RecipeApp/">
       <Routes>
         <Route path="/" element={<RecipeList />} />
         <Route path="/add-recipe" element={<AddRecipeForm />} />
